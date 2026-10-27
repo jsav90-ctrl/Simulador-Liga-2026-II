@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador Liga BetPlay II-2026</title>
+<meta name="description" content="Simulador Montecarlo de la Liga BetPlay II-2026: probabilidad de entrar al top 8.">
+<style>
+:root{
+  --bg:#f4f6f9;--card:#fff;--tx:#151a22;--mut:#5a6572;--bd:#d8dee6;--pri:#1d5fc0;--pri-tx:#fff;
+  --verde:#d8f4e5;--amar:#fcf2c6;--rojo:#fde2e2;--ok:#17894f;--mal:#c62828;--bar:#1d5fc0;--bar-bg:#e6ebf2;
+  --warn:#9a5b00;--sel:#e8f0fd;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141b;--card:#171d26;--tx:#e8ecf2;--mut:#9aa6b5;--bd:#2c3644;--pri:#5b9bf5;--pri-tx:#0b1220;
+    --verde:#17372a;--amar:#3b3515;--rojo:#3d1d1f;--ok:#4cc58a;--mal:#ff7b7b;--bar:#5b9bf5;--bar-bg:#27303d;
+    --warn:#f0b24d;--sel:#1f3050;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:4px 0 2px}
+.sub{margin:0 0 12px;color:var(--mut)}
+.panel,.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:3px;font-size:.82rem;color:var(--mut)}
+input,select,button{font:inherit}
+input[type=text],input[type=number],select{padding:7px 8px;border:1px solid var(--bd);border-radius:7px;background:var(--bg);color:var(--tx);width:100%}
+input[readonly]{opacity:.75}
+.chk{flex-direction:row;align-items:center;gap:8px;color:var(--tx);font-size:.9rem}
+.chk input{width:18px;height:18px}
+.botones{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+button{padding:8px 12px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);cursor:pointer}
+button:hover{border-color:var(--pri)}
+button.pri{background:var(--pri);color:var(--pri-tx);border-color:var(--pri);font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+.prog{flex:1;min-width:160px;height:10px;background:var(--bar-bg);border-radius:6px;overflow:hidden}
+.prog>div{height:100%;width:0;background:var(--bar);transition:width .15s}
+#estado{font-size:.85rem;color:var(--mut)}
+#msg{margin:10px 0 0;padding:0}
+#msg div{padding:9px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);margin-top:6px;white-space:pre-wrap}
+#msg .err{border-color:var(--mal);color:var(--mal)}
+.tabs{display:flex;gap:4px;margin:14px 0 0;overflow-x:auto;border-bottom:1px solid var(--bd)}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 14px;white-space:nowrap}
+.tabs button[aria-selected=true]{border-bottom-color:var(--pri);font-weight:600}
+section.tab{display:none;margin-top:12px}
+section.tab.on{display:block}
+.banner{color:var(--warn);font-weight:600;margin:0 0 4px}
+.leyenda{margin:0 0 8px;font-size:.85rem;color:var(--mut)}
+.tw{overflow-x:auto;border:1px solid var(--bd);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:860px}
+th,td{padding:6px 8px;text-align:center;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--bd);cursor:pointer;user-select:none;font-size:.85rem}
+td.l,th.l{text-align:left}
+tbody tr{border-top:1px solid var(--bd)}
+tr.v{background:var(--verde)}tr.a{background:var(--amar)}tr.r{background:var(--rojo)}
+tr.seguro td{font-weight:700}
+tr.nunca td{color:var(--mal)}
+tr.sel{outline:2px solid var(--pri);outline-offset:-2px}
+.bar{display:inline-block;width:100px;height:11px;background:var(--bar-bg);border-radius:6px;overflow:hidden;vertical-align:middle}
+.bar>i{display:block;height:100%;background:var(--bar)}
+.up{color:var(--ok);font-weight:600}.dn{color:var(--mal);font-weight:600}
+.mat-c{color:var(--ok);font-weight:700}.mat-e{color:var(--mal);font-weight:700}
+#avisos{margin-top:10px;max-height:190px;overflow:auto;font:12.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap}
+.row2{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:8px}
+.row2 label{min-width:130px}
+.cols{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:900px){.cols{grid-template-columns:1fr 1fr}}
+h3{font-size:1rem;margin:0 0 8px}
+.brow{display:grid;grid-template-columns:minmax(120px,190px) 1fr 62px;gap:8px;align-items:center;margin:3px 0;font-size:.88rem}
+.btrack{height:14px;background:var(--bar-bg);border-radius:7px;overflow:hidden}
+.bfill{height:100%}
+.bfill.v{background:var(--ok)}.bfill.a{background:#e0a21b}.bfill.r{background:var(--mal)}
+.bv{text-align:right;font-variant-numeric:tabular-nums}
+.heat{min-width:0;font-size:.72rem}
+.heat td,.heat th{padding:2px 3px;cursor:default}
+.heat th.l,.heat td.l{position:sticky;left:0;background:var(--card);font-size:.78rem}
+.heat td.c8{border-right:2px dashed var(--mal)}
+.hist{display:flex;align-items:flex-end;gap:3px;height:190px;padding-top:8px}
+.hist div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:.7rem}
+.hist i{display:block;width:100%;background:var(--bar);border-radius:3px 3px 0 0;min-height:1px}
+.hist .med i{background:var(--mal)}
+.checks{display:flex;flex-wrap:wrap;gap:4px 14px;margin-bottom:8px;font-size:.85rem}
+.checks label{flex-direction:row;align-items:center;gap:5px;color:var(--tx)}
+svg text{fill:var(--mut);font-size:11px}
+.muted{color:var(--mut)}
+.nota{font-size:.85rem;color:var(--mut)}
+pre.ay{white-space:pre-wrap;font:inherit;margin:0}
+.footer{margin:18px 0 6px;color:var(--mut);font-size:.8rem}
+@media (max-width:560px){.wrap{padding:12px}.brow{grid-template-columns:110px 1fr 54px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Simulador Montecarlo · Liga BetPlay II-2026</h1>
+    <p class="sub">¿Quién entra al top 8? <span id="corte"></span></p>
+  </header>
+
+  <noscript><div class="card">Esta página necesita JavaScript.</div></noscript>
+
+  <section class="panel" aria-label="Parámetros">
+    <div class="botones" style="margin-top:0">
+      <button class="pri" id="b-sim">Simular</button>
+      <div class="prog" aria-hidden="true"><div id="prog"></div></div>
+      <span id="estado" role="status">Listo</span>
+    </div>
+    <details id="opciones" open style="margin-top:10px">
+      <summary style="cursor:pointer;color:var(--mut);font-size:.9rem">Parámetros y herramientas</summary>
+      <div class="grid" style="margin-top:10px">
+        <label>Simulaciones<input id="p-sims" type="number" min="1000" max="500000" step="5000"></label>
+        <label>Semilla (vacío = aleatoria)<input id="p-seed" type="text" inputmode="numeric"></label>
+        <label>Ventaja local (goles)<input id="p-vent" type="text" inputmode="decimal"></label>
+        <label>Encogimiento K<input id="p-k" type="text" inputmode="decimal"></label>
+        <label>Puntaje fijo X<input id="p-x" type="text" inputmode="numeric"></label>
+        <label>Etiqueta (jornada)<input id="p-etq" type="text" placeholder="p. ej. Tras fecha 17"></label>
+        <label>Desempate<input type="text" readonly value="pts/dg/gf/gf vis./gc vis./sorteo"></label>
+        <label class="chk"><input id="p-relleno" type="checkbox"> Completar partidos faltantes (aprox.)</label>
+      </div>
+      <div class="botones">
+        <button id="b-csv">Exportar resultados (CSV)</button>
+        <button id="b-imp">Importar resultados (CSV)</button>
+        <button id="b-resp">Guardar respaldo</button>
+        <button id="b-rest">Cargar respaldo</button>
+        <button id="b-reset">Borrar cambios de este navegador</button>
+        <input type="file" id="f-imp" accept=".csv,text/csv" hidden>
+        <input type="file" id="f-rest" accept=".json,application/json" hidden>
+      </div>
+    </details>
+  </section>
+  <div id="msg" aria-live="polite"></div>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="res" aria-selected="true">Resultados</button>
+    <button role="tab" data-tab="gra" aria-selected="false">Gráficos</button>
+    <button role="tab" data-tab="par" aria-selected="false">Partidos</button>
+    <button role="tab" data-tab="his" aria-selected="false">Historial</button>
+    <button role="tab" data-tab="ayu" aria-selected="false">Ayuda</button>
+  </div>
+
+  <section class="tab on" id="tab-res">
+    <p class="banner" id="banner"></p>
+    <p class="leyenda"><b>Negrita</b>: entra al top 8 en todas las simulaciones. <span style="color:var(--mal)">Rojo</span>: no entra en ninguna. Orden inicial: tabla actual. Clic en «#» para volver a ese orden.</p>
+    <div class="tw"><table id="t-res"><thead></thead><tbody></tbody></table></div>
+    <div class="card" id="avisos"></div>
+  </section>
+
+  <section class="tab" id="tab-gra">
+    <div class="cols">
+      <div class="card"><h3>P(top 8) por equipo</h3><div id="g-bars"></div></div>
+      <div class="card"><h3>Puntaje del 8.º lugar al final</h3><div id="g-corte"></div><p class="nota" id="g-corte-n"></p></div>
+    </div>
+    <div class="card" style="margin-top:12px"><h3>Mapa de calor: equipo × posición final</h3>
+      <p class="nota">Filas ordenadas por puntos esperados. La línea punteada separa las posiciones 8 y 9.</p>
+      <div class="tw"><table class="heat" id="g-heat"></table></div></div>
+  </section>
+
+  <section class="tab" id="tab-par">
+    <div class="tw" style="max-height:420px;overflow:auto"><table id="t-par" style="min-width:720px"><thead><tr>
+      <th>#</th><th>Fecha</th><th class="l">Local</th><th class="l">Visitante</th><th>Estado</th><th>Goles</th><th class="l">Nota</th></tr></thead><tbody></tbody></table></div>
+    <div class="cols" style="margin-top:12px">
+      <div class="card"><h3>Resultado del partido seleccionado</h3>
+        <p class="nota" id="sel-txt">Selecciona un partido de la lista.</p>
+        <div class="row2">
+          <label>Goles local<input id="e-gl" type="number" min="0" step="1"></label>
+          <label>Goles visitante<input id="e-gv" type="number" min="0" step="1"></label>
+        </div>
+        <div class="botones"><button class="pri" id="b-marcar">Marcar como jugado</button><button id="b-deshacer">Deshacer resultado</button></div>
+        <p class="nota">Lo que marques aquí se guarda solo en este navegador. Para que lo vea todo el mundo, edita <code>datos.js</code> en GitHub.</p>
+        <div id="asig" hidden>
+          <h3 style="margin-top:14px">Asignar equipos (fila «POR COMPLETAR»)</h3>
+          <div class="row2"><label>Local<select id="a-loc"></select></label><label>Visitante<select id="a-vis"></select></label>
+            <label>Fecha<input id="a-fec" type="text"></label></div>
+          <div class="botones"><button id="b-asig">Asignar equipos</button></div>
+        </div>
+      </div>
+      <div class="card"><h3>Agregar un partido jugado que no está en el calendario</h3>
+        <div class="row2"><label>Local<select id="x-loc"></select></label><label>Visitante<select id="x-vis"></select></label></div>
+        <div class="row2"><label>Goles local<input id="x-gl" type="number" min="0" step="1"></label>
+          <label>Goles visitante<input id="x-gv" type="number" min="0" step="1"></label></div>
+        <div class="botones"><button id="b-extra">Agregar partido jugado</button></div>
+        <p class="nota">Se suma sobre la tabla del corte, igual que una fila con jugado=1.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-his">
+    <div class="card">
+      <div class="checks" id="h-checks"></div>
+      <div id="h-chart"></div>
+      <div class="botones"><button id="b-hborrar">Borrar historial</button></div>
+    </div>
+  </section>
+
+  <section class="tab" id="tab-ayu"><div class="card"><pre class="ay" id="ayuda"></pre></div></section>
+
+  <p class="footer">Resultados aproximados: son una simulación, no una predicción. Verifica el orden de desempate con el reglamento de Dimayor.</p>
+</div>
+
+<script src="datos.js"></script>
+<script type="text/plain" id="motor">'use strict';
+/* ===== MOTOR (sin DOM): datos, validación, modelo, simulación y estado matemático =====
+ * Se ejecuta tanto en la página como en un Web Worker. Port del simulador de escritorio (Python). */
+
+const TOP_N = 8, PTS_G = 3, PTS_E = 1;
+const POR_COMPLETAR = 'POR COMPLETAR';
+const MU_BASE = 1.15, W_DG = 0.6, W_PPG = 0.4, PUNTOS_A_GOLES = 0.8;
+const LAMBDA_MIN = 0.15, LAMBDA_MAX = 4.0;
+const PM = 160; // puntos máximos que registra el histograma
+const ALIAS = {
+  'Cali': 'Deportivo Cali', 'América': 'América de Cali', 'Nacional': 'Atlético Nacional',
+  'Medellín': 'Independiente Medellín', 'Santa Fe': 'Independiente Santa Fe',
+  'Bucaramanga': 'Atlético Bucaramanga', 'Tolima': 'Deportes Tolima', 'Pasto': 'Deportivo Pasto',
+  'Pereira': 'Deportivo Pereira', 'Águilas': 'Águilas Doradas', 'Cúcuta': 'Cúcuta Deportivo',
+  'Alianza': 'Alianza Valledupar', 'Inter': 'Internacional de Bogotá', 'Fortaleza': 'Fortaleza CEIF',
+  'Jaguares': 'Jaguares de Córdoba', 'Chicó': 'Boyacá Chicó', 'Llaneros': 'Llaneros FC'
+};
+
+/* ---------- utilidades ---------- */
+function normalizar(s) {
+  return String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+function parseCSV(texto) {
+  texto = String(texto || '').replace(/^﻿/, '');
+  const filas = [];
+  let fila = [], campo = '', q = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (q) {
+      if (c === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else q = false; } else campo += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { fila.push(campo); campo = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && texto[i + 1] === '\n') i++;
+      fila.push(campo); campo = ''; filas.push(fila); fila = [];
+    } else campo += c;
+  }
+  if (campo !== '' || fila.length) { fila.push(campo); filas.push(fila); }
+  const utiles = filas.filter(f => f.some(x => x.trim() !== ''));
+  if (!utiles.length) return [];
+  const enc = utiles[0].map(x => x.trim());
+  return utiles.slice(1).map(f => {
+    const o = {};
+    enc.forEach((h, i) => { o[h] = (f[i] === undefined ? '' : f[i]).trim(); });
+    return o;
+  });
+}
+
+function enteroOpt(v) {
+  const t = String(v === undefined || v === null ? '' : v).trim();
+  if (t === '') return null;
+  if (!/^-?\d+$/.test(t)) throw new Error('no es entero: ' + t);
+  return parseInt(t, 10);
+}
+
+function construirMapa(nombres) {
+  const mapa = {};
+  nombres.forEach(n => { mapa[normalizar(n)] = n; });
+  Object.keys(ALIAS).forEach(a => {
+    if (nombres.includes(ALIAS[a]) && mapa[normalizar(a)] === undefined) mapa[normalizar(a)] = ALIAS[a];
+  });
+  return mapa;
+}
+
+function completo(p) { return p.local !== POR_COMPLETAR && p.visitante !== POR_COMPLETAR; }
+
+/* ---------- carga y validación de datos ---------- */
+function parseEquipos(texto, adv) {
+  const tabla = [];
+  parseCSV(texto).forEach((r, i) => {
+    const n = i + 2, nombre = (r.equipo || '').trim();
+    if (!nombre) { adv.push(`teams fila ${n} sin nombre: se omite`); return; }
+    try {
+      const pj = enteroOpt(r.pj), pts = enteroOpt(r.pts), dg = enteroOpt(r.dg);
+      if (pj === null || pts === null || dg === null) throw new Error('faltan pj/pts/dg');
+      tabla.push({
+        equipo: nombre, pj, pts, dg, gf: enteroOpt(r.gf), gc: enteroOpt(r.gc),
+        gfv: enteroOpt(r.gf_visitante), gcv: enteroOpt(r.gc_visitante)
+      });
+    } catch (e) { adv.push(`teams fila ${n}: valores inválidos (${e.message}); se omite`); }
+  });
+  return tabla;
+}
+
+function resolver(raw, mapa, adv, n) {
+  const t = (raw || '').trim();
+  if (normalizar(t) === '' || normalizar(t) === normalizar(POR_COMPLETAR)) return POR_COMPLETAR;
+  const nombre = mapa[normalizar(t)];
+  if (nombre === undefined) { adv.push(`fixtures fila ${n}: equipo no reconocido '${t}'`); return t; }
+  return nombre;
+}
+
+function parsePartidos(texto, mapa, adv) {
+  return parseCSV(texto).map((r, i) => {
+    const n = i + 2;
+    const local = resolver(r.local, mapa, adv, n), visitante = resolver(r.visitante, mapa, adv, n);
+    const jugado = (r.jugado || '').trim() === '1';
+    let gl = null, gv = null;
+    try { gl = enteroOpt(r.goles_local); gv = enteroOpt(r.goles_visitante); }
+    catch (e) { gl = gv = null; adv.push(`fixtures fila ${n}: goles no válidos`); }
+    if (jugado && (gl === null || gv === null || gl < 0 || gv < 0)) {
+      adv.push(`fixtures fila ${n}: jugado=1 sin goles válidos; no se aplicará`);
+    }
+    return { fecha: (r.fecha || '').trim(), local, visitante, jugado, gl, gv, nota: (r.nota || '').trim() };
+  });
+}
+
+function chequearTabla(tabla) {
+  const adv = [];
+  if (!tabla.length) return ['teams no tiene equipos'];
+  const sumaDg = tabla.reduce((s, f) => s + f.dg, 0);
+  if (sumaDg !== 0) adv.push(`La suma de DG de los equipos es ${sumaDg}; debería ser 0`);
+  tabla.forEach(f => {
+    if (f.gf !== null && f.gc !== null && f.gf - f.gc !== f.dg) {
+      adv.push(`${f.equipo}: gf - gc (${f.gf - f.gc}) no coincide con dg (${f.dg})`);
+    }
+  });
+  const con = tabla.map(f => f.gf !== null && f.gc !== null);
+  if (con.some(Boolean) && !con.every(Boolean)) adv.push('GF/GC incompletos: el modelo usará solo DG y puntos para todos los equipos');
+  else if (!con.some(Boolean)) adv.push('Sin GF/GC: el desempate por GF solo cuenta goles simulados (sesgo menor)');
+  tabla.forEach(f => {
+    if (f.gfv !== null && f.gf !== null && f.gfv > f.gf) adv.push(`${f.equipo}: gf_visitante (${f.gfv}) mayor que gf (${f.gf})`);
+    if (f.gcv !== null && f.gc !== null && f.gcv > f.gc) adv.push(`${f.equipo}: gc_visitante (${f.gcv}) mayor que gc (${f.gc})`);
+  });
+  if (!tabla.every(f => f.gfv !== null && f.gcv !== null)) {
+    adv.push('Sin goles de visitante (gf_visitante/gc_visitante): esos criterios de desempate solo cuentan los goles simulados');
+  }
+  return adv;
+}
+
+function aplicarResultados(base, partidos) {
+  const tabla = base.map(f => Object.assign({}, f));
+  const pos = {};
+  tabla.forEach((f, i) => { pos[f.equipo] = i; });
+  const adv = [];
+  partidos.forEach(p => {
+    if (!p.jugado) return;
+    if (pos[p.local] === undefined || pos[p.visitante] === undefined) {
+      adv.push(`Resultado ignorado (equipo sin identificar): ${p.local} vs ${p.visitante} (${p.fecha})`); return;
+    }
+    if (p.gl === null || p.gv === null || p.gl < 0 || p.gv < 0) {
+      adv.push(`Resultado ignorado (goles inválidos): ${p.local} vs ${p.visitante}`); return;
+    }
+    const L = tabla[pos[p.local]], V = tabla[pos[p.visitante]], gl = p.gl, gv = p.gv;
+    L.pj++; V.pj++;
+    if (gl > gv) L.pts += PTS_G; else if (gl < gv) V.pts += PTS_G; else { L.pts += PTS_E; V.pts += PTS_E; }
+    L.dg += gl - gv; V.dg += gv - gl;
+    [[L, gl, gv], [V, gv, gl]].forEach(([eq, a, b]) => {
+      if (eq.gf !== null && eq.gc !== null) { eq.gf += a; eq.gc += b; }
+    });
+    if (V.gfv !== null && V.gcv !== null) { V.gfv += gv; V.gcv += gl; }
+  });
+  return { tabla, adv };
+}
+
+function validar(tabla, partidos) {
+  const nombres = new Set(tabla.map(f => f.equipo));
+  const esperados = {}, cargados = {};
+  tabla.forEach(f => { esperados[f.equipo] = (tabla.length - 1) - f.pj; cargados[f.equipo] = 0; });
+  const adv = [], vistos = {};
+  partidos.forEach(p => {
+    if (!completo(p)) return;
+    if (!nombres.has(p.local) || !nombres.has(p.visitante)) {
+      adv.push(`Partido con equipo no reconocido: ${p.local} vs ${p.visitante} (${p.fecha})`); return;
+    }
+    const k = `${p.fecha}|${p.local}|${p.visitante}`;
+    vistos[k] = (vistos[k] || 0) + 1;
+    if (!p.jugado) { cargados[p.local]++; cargados[p.visitante]++; }
+  });
+  Object.keys(vistos).forEach(k => {
+    if (vistos[k] > 1) { const [f, l, v] = k.split('|'); adv.push(`Partido duplicado: ${l} vs ${v} (${f}) aparece ${vistos[k]} veces`); }
+  });
+  const faltantes = {};
+  let suma = 0;
+  tabla.forEach(f => {
+    const d = esperados[f.equipo] - cargados[f.equipo];
+    faltantes[f.equipo] = Math.max(d, 0);
+    suma += faltantes[f.equipo];
+    if (d > 0) adv.push(`${f.equipo}: esperados ${esperados[f.equipo]}, cargados ${cargados[f.equipo]}, faltan ${d}`);
+    else if (d < 0) adv.push(`${f.equipo}: esperados ${esperados[f.equipo]}, cargados ${cargados[f.equipo]}, sobran ${-d} (se simula igual)`);
+  });
+  return { esperados, cargados, faltantes, advertencias: adv, totalFaltantes: suma / 2 };
+}
+
+/* ---------- orden de la tabla (reglamento) ---------- */
+function cmpTabla(a, b) {
+  return (b.pts - a.pts) || (b.dg - a.dg) || ((b.gf || 0) - (a.gf || 0)) || ((b.gfv || 0) - (a.gfv || 0)) ||
+    ((a.gcv || 0) - (b.gcv || 0)) || normalizar(a.equipo).localeCompare(normalizar(b.equipo));
+}
+
+/* ---------- modelo de fuerzas ---------- */
+function estimarFuerzas(tabla, k) {
+  const T = tabla.length;
+  const pj = tabla.map(f => f.pj), pjs = pj.map(x => Math.max(x, 1));
+  const encog = pj.map(x => x / (x + k));
+  const sumPj = Math.max(pj.reduce((s, x) => s + x, 0), 1);
+  let att = new Array(T), dfn = new Array(T), mu, metodo;
+  if (tabla.every(f => f.gf !== null && f.gc !== null)) {
+    mu = tabla.reduce((s, f) => s + f.gf, 0) / sumPj;
+    if (mu <= 0) mu = MU_BASE;
+    tabla.forEach((f, i) => {
+      att[i] = Math.log((f.gf / pjs[i] + 0.5 / pjs[i]) / mu) * encog[i];
+      dfn[i] = -Math.log((f.gc / pjs[i] + 0.5 / pjs[i]) / mu) * encog[i];
+    });
+    metodo = 'GF/GC';
+  } else {
+    const ligaPpg = tabla.reduce((s, f) => s + f.pts, 0) / sumPj;
+    tabla.forEach((f, i) => {
+      const raw = W_DG * (f.dg / pjs[i]) + W_PPG * (f.pts / pjs[i] - ligaPpg) * PUNTOS_A_GOLES;
+      att[i] = dfn[i] = (raw * encog[i]) / (2 * MU_BASE);
+    });
+    mu = MU_BASE; metodo = 'solo DG y puntos';
+  }
+  const ma = att.reduce((s, x) => s + x, 0) / T, md = dfn.reduce((s, x) => s + x, 0) / T;
+  att = att.map(x => x - ma); dfn = dfn.map(x => x - md);
+  return { att, dfn, mu, metodo };
+}
+
+/* ---------- simulación Montecarlo ---------- */
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function percentilHist(hist, off, n, q) {
+  const k = q * (n - 1), lo = Math.floor(k), fr = k - lo;
+  const valor = idx => { let acc = 0; for (let p = 0; p < PM; p++) { acc += hist[off + p]; if (acc > idx) return p; } return PM - 1; };
+  return valor(lo) * (1 - fr) + valor(Math.min(lo + 1, n - 1)) * fr;
+}
+
+const clip = x => Math.min(Math.max(x, LAMBDA_MIN), LAMBDA_MAX);
+
+function simular(tabla, partidos, cfg, progreso) {
+  const val = validar(tabla, partidos);
+  const advertencias = val.advertencias.slice();
+  const fz = estimarFuerzas(tabla, cfg.k);
+  const T = tabla.length, pos = {};
+  tabla.forEach((f, i) => { pos[f.equipo] = i; });
+  const h = Math.log((fz.mu + cfg.ventaja / 2) / fz.mu);
+  const a = Math.log(Math.max(fz.mu - cfg.ventaja / 2, 1e-3) / fz.mu);
+
+  const reales = partidos.filter(p => !p.jugado && completo(p) && pos[p.local] !== undefined && pos[p.visitante] !== undefined);
+  const M = reales.length;
+  const rL = new Int32Array(M), rV = new Int32Array(M), eL = new Float64Array(M), eV = new Float64Array(M);
+  const lamL = new Float64Array(M), lamV = new Float64Array(M);
+  reales.forEach((p, m) => {
+    const l = pos[p.local], v = pos[p.visitante];
+    rL[m] = l; rV[m] = v;
+    lamL[m] = clip(fz.mu * Math.exp(fz.att[l] - fz.dfn[v] + h));
+    lamV[m] = clip(fz.mu * Math.exp(fz.att[v] - fz.dfn[l] + a));
+    eL[m] = Math.exp(-lamL[m]); eV[m] = Math.exp(-lamV[m]);
+  });
+  // Relleno: partidos virtuales de cada equipo contra un rival promedio; solo afectan al equipo propio.
+  const vt = [], vs = [], vc = [], vvis = [];
+  if (cfg.relleno) {
+    tabla.forEach((f, t) => {
+      for (let i = 0; i < val.faltantes[f.equipo]; i++) {
+        const sc = i % 2 === 0 ? h : a, cn = i % 2 === 0 ? a : h;
+        vt.push(t); vvis.push(i % 2 === 1);
+        vs.push(clip(fz.mu * Math.exp(fz.att[t] + sc)));
+        vc.push(clip(fz.mu * Math.exp(-fz.dfn[t] + cn)));
+      }
+    });
+  }
+  const NV = vt.length, evs = vs.map(x => Math.exp(-x)), evc = vc.map(x => Math.exp(-x));
+  if (val.totalFaltantes > 0) {
+    advertencias.push(cfg.relleno
+      ? `Resultados aproximados: faltan ${val.totalFaltantes} partidos por cargar (relleno activado)`
+      : `Simulación solo con partidos cargados: faltan ${val.totalFaltantes} partidos`);
+  }
+
+  const ptsB = Int32Array.from(tabla.map(f => f.pts)), dgB = Int32Array.from(tabla.map(f => f.dg));
+  const gfB = Int32Array.from(tabla.map(f => f.gf || 0)), gfvB = Int32Array.from(tabla.map(f => f.gfv || 0));
+  const gcvB = Int32Array.from(tabla.map(f => f.gcv || 0));
+  const pts = new Int32Array(T), dg = new Int32Array(T), gf = new Int32Array(T), gfv = new Int32Array(T), gcv = new Int32Array(T);
+  const rnd = new Float64Array(T), orden = new Int32Array(T);
+
+  const n = cfg.sims;
+  const semilla = (cfg.seed === null || cfg.seed === undefined || cfg.seed === '') ? Math.floor(Math.random() * 4294967296) : cfg.seed;
+  const rng = mulberry32(semilla);
+  const pois = L => { let k = 0, p = rng(); while (p > L) { k++; p *= rng(); } return k; };
+
+  const top = new Float64Array(T), conteo = new Float64Array(T * T), ptsHist = new Float64Array(T * PM);
+  const sumaPts = new Float64Array(T), corteHist = new Float64Array(PM);
+  const lote = 5000;
+  for (let s = 0; s < n; s++) {
+    pts.set(ptsB); dg.set(dgB); gf.set(gfB); gfv.set(gfvB); gcv.set(gcvB);
+    for (let m = 0; m < M; m++) {
+      const gl = pois(eL[m]), gv = pois(eV[m]), l = rL[m], v = rV[m];
+      if (gl > gv) pts[l] += 3; else if (gl < gv) pts[v] += 3; else { pts[l]++; pts[v]++; }
+      dg[l] += gl - gv; dg[v] += gv - gl; gf[l] += gl; gf[v] += gv; gfv[v] += gv; gcv[v] += gl;
+    }
+    for (let j = 0; j < NV; j++) {
+      const t = vt[j], gs = pois(evs[j]), gc = pois(evc[j]);
+      if (gs > gc) pts[t] += 3; else if (gs === gc) pts[t]++;
+      dg[t] += gs - gc; gf[t] += gs;
+      if (vvis[j]) { gfv[t] += gs; gcv[t] += gc; }
+    }
+    for (let t = 0; t < T; t++) { rnd[t] = rng(); orden[t] = t; }
+    // orden por inserción: pts ↓, DG ↓, GF ↓, GF visitante ↓, GC visitante ↑, sorteo
+    for (let i = 1; i < T; i++) {
+      const x = orden[i];
+      let j = i - 1;
+      while (j >= 0) {
+        const y = orden[j];
+        const antes = pts[x] !== pts[y] ? pts[x] > pts[y]
+          : dg[x] !== dg[y] ? dg[x] > dg[y]
+            : gf[x] !== gf[y] ? gf[x] > gf[y]
+              : gfv[x] !== gfv[y] ? gfv[x] > gfv[y]
+                : gcv[x] !== gcv[y] ? gcv[x] < gcv[y]
+                  : rnd[x] > rnd[y];
+        if (!antes) break;
+        orden[j + 1] = y; j--;
+      }
+      orden[j + 1] = x;
+    }
+    for (let k = 0; k < T; k++) {
+      const t = orden[k];
+      conteo[t * T + k]++;
+      if (k < TOP_N) top[t]++;
+    }
+    corteHist[Math.min(pts[orden[TOP_N - 1]], PM - 1)]++;
+    for (let t = 0; t < T; t++) { ptsHist[t * PM + Math.min(pts[t], PM - 1)]++; sumaPts[t] += pts[t]; }
+    if (progreso && (s + 1) % lote === 0) progreso(s + 1, n);
+  }
+  if (progreso) progreso(n, n);
+
+  const p10 = [], p50 = [], p90 = [], ptsEsp = [], pTop8 = [], probX = [], siempre = [], nunca = [];
+  for (let t = 0; t < T; t++) {
+    p10.push(percentilHist(ptsHist, t * PM, n, 0.1)); p50.push(percentilHist(ptsHist, t * PM, n, 0.5));
+    p90.push(percentilHist(ptsHist, t * PM, n, 0.9));
+    ptsEsp.push(sumaPts[t] / n); pTop8.push(top[t] / n);
+    let ge = 0;
+    for (let p = Math.min(Math.max(cfg.x, 0), PM - 1); p < PM; p++) ge += ptsHist[t * PM + p];
+    probX.push(cfg.x <= 0 ? 1 : ge / n);
+    siempre.push(top[t] === n); nunca.push(top[t] === 0);
+  }
+  const corte = [];
+  corteHist.forEach((f, v) => { if (f > 0) corte.push([v, f]); });
+  const dist = {};
+  tabla.forEach((f, t) => { dist[f.equipo] = Array.from(conteo.subarray(t * T, t * T + T), x => x / n); });
+  return {
+    nombres: tabla.map(f => f.equipo), pTop8, ptsEsp, p10, p50, p90, probX, siempre, nunca, dist, corte,
+    nSims: n, seed: semilla, faltan: val.totalFaltantes, relleno: cfg.relleno, x: cfg.x, k: cfg.k,
+    ventaja: cfg.ventaja, metodoFuerzas: fz.metodo, advertencias, timestamp: new Date().toISOString().slice(0, 19)
+  };
+}
+
+/* ---------- estado matemático ---------- */
+function estadoSimple(tabla, topN) {
+  topN = topN || TOP_N;
+  const total = tabla.length - 1, max = {};
+  tabla.forEach(f => { max[f.equipo] = f.pts + PTS_G * Math.max(total - f.pj, 0); });
+  const est = {};
+  tabla.forEach(f => {
+    const otros = tabla.filter(g => g !== f);
+    if (otros.filter(g => max[g.equipo] >= f.pts).length < topN) est[f.equipo] = 'Clasificado';
+    else if (otros.filter(g => g.pts > max[f.equipo]).length >= topN) est[f.equipo] = 'Eliminado';
+    else est[f.equipo] = '';
+  });
+  return est;
+}
+
+function combinaciones(arr, k, cb) { // cb devuelve true para detenerse
+  const sel = [];
+  function rec(i) {
+    if (sel.length === k) return cb(sel);
+    if (arr.length - i < k - sel.length) return false;
+    for (let j = i; j < arr.length; j++) {
+      sel.push(arr[j]);
+      if (rec(j + 1)) { sel.pop(); return true; }
+      sel.pop();
+    }
+    return false;
+  }
+  return rec(0);
+}
+
+/* Exacto con el calendario: considera que los rivales se quitan puntos entre sí.
+ * - Clasificado: perdiendo todo, NO existe combinación en que topN rivales lo igualen o superen
+ *   (los empates cuentan en contra).
+ * - Eliminado: ganando todo, NO existe combinación en que queden menos de topN rivales por encima. */
+function estadoExacto(tabla, partidos, topN, limiteMs) {
+  topN = topN || TOP_N; limiteMs = limiteMs || 8000;
+  const val = validar(tabla, partidos);
+  if (tabla.some(f => val.cargados[f.equipo] !== val.esperados[f.equipo])) {
+    return { estado: null, metodo: 'cota simple (el calendario de fixtures no está completo o tiene partidos de más)' };
+  }
+  const T = tabla.length, pos = {};
+  tabla.forEach((f, i) => { pos[f.equipo] = i; });
+  const pend = partidos.filter(p => !p.jugado && completo(p) && pos[p.local] !== undefined && pos[p.visitante] !== undefined)
+    .map(p => [pos[p.local], pos[p.visitante]]);
+  const base = tabla.map(f => f.pts), juegos = new Array(T).fill(0);
+  pend.forEach(([l, v]) => { juegos[l]++; juegos[v]++; });
+  const estado = estadoSimple(tabla, topN);
+  const t0 = Date.now(), TIEMPO = { tiempo: true };
+  let nodos = 0, incompleto = false;
+  const tick = () => { if ((++nodos & 1023) === 0 && Date.now() - t0 > limiteMs) throw TIEMPO; };
+
+  function dentroDe(S) {
+    const idx = new Map(S.map((t, i) => [t, i])), dentro = [], ng = new Array(S.length).fill(0);
+    pend.forEach(([l, v]) => {
+      if (idx.has(l) && idx.has(v)) { dentro.push([idx.get(l), idx.get(v)]); ng[idx.get(l)]++; ng[idx.get(v)]++; }
+    });
+    return { dentro, ng };
+  }
+
+  // ¿pueden todos los de S llegar a ptsX? (los que no están en S pierden contra los de S)
+  function factibleA(S, ptsX) {
+    const { dentro, ng } = dentroDe(S);
+    const need = S.map((t, i) => Math.max(0, ptsX - (base[t] + 3 * (juegos[t] - ng[i]))));
+    let suma = 0;
+    for (let i = 0; i < S.length; i++) { if (need[i] > 3 * ng[i]) return false; suma += need[i]; }
+    if (suma > 3 * dentro.length) return false;
+    const rem = ng.slice();
+    const cota = m => { let s = 0; for (let i = 0; i < need.length; i++) { if (need[i] > 3 * rem[i]) return false; if (need[i] > 0) s += need[i]; } return s <= 3 * (dentro.length - m); };
+    function dfs(m) {
+      tick();
+      if (m === dentro.length) return need.every(x => x <= 0);
+      const [a, b] = dentro[m];
+      rem[a]--; rem[b]--;
+      const opts = need[a] >= need[b] ? [[3, 0], [1, 1], [0, 3]] : [[0, 3], [1, 1], [3, 0]];
+      let ok = false;
+      for (const [pa, pb] of opts) {
+        need[a] -= pa; need[b] -= pb;
+        if (cota(m + 1) && dfs(m + 1)) ok = true;
+        need[a] += pa; need[b] += pb;
+        if (ok) break;
+      }
+      rem[a]++; rem[b]++;
+      return ok;
+    }
+    return dfs(0);
+  }
+
+  // ¿pueden todos los de S terminar con ≤ M puntos? (pierden contra todo el que no está en S)
+  function factibleB(S, Mx) {
+    const { dentro } = dentroDe(S);
+    const cap = S.map(t => Mx - base[t]);
+    const cotaB = m => { let s = 0; for (const c of cap) { if (c < 0) return false; s += c; } return s >= 2 * (dentro.length - m); };
+    if (!cotaB(0)) return false;
+    function dfs(m) {
+      tick();
+      if (m === dentro.length) return true;
+      const [a, b] = dentro[m];
+      const opts = cap[a] >= cap[b] ? [[1, 1], [3, 0], [0, 3]] : [[1, 1], [0, 3], [3, 0]];
+      let ok = false;
+      for (const [pa, pb] of opts) {
+        cap[a] -= pa; cap[b] -= pb;
+        if (cap[a] >= 0 && cap[b] >= 0 && cotaB(m + 1) && dfs(m + 1)) ok = true;
+        cap[a] += pa; cap[b] += pb;
+        if (ok) break;
+      }
+      return ok;
+    }
+    return dfs(0);
+  }
+
+  tabla.forEach((f, x) => {
+    if (estado[f.equipo]) return;
+    try {
+      // ¿Puede quedar fuera? x pierde todo; ¿pueden topN rivales llegar a sus puntos?
+      const ptsX = base[x];
+      const candA = [];
+      for (let t = 0; t < T; t++) if (t !== x && base[t] + 3 * juegos[t] >= ptsX) candA.push(t);
+      candA.sort((p, q) => (base[q] + 3 * juegos[q]) - (base[p] + 3 * juegos[p]));
+      const puedeFuera = candA.length >= topN && combinaciones(candA, topN, S => factibleA(S, ptsX));
+      if (!puedeFuera) { estado[f.equipo] = 'Clasificado'; return; }
+      // ¿Puede clasificar? x gana todo; ¿pueden T-topN rivales quedar ≤ sus puntos?
+      const Mx = base[x] + 3 * juegos[x], k = T - topN;
+      const candB = [];
+      for (let t = 0; t < T; t++) if (t !== x && base[t] <= Mx) candB.push(t);
+      candB.sort((p, q) => base[p] - base[q]);
+      const puedeEntrar = candB.length >= k && combinaciones(candB, k, S => factibleB(S, Mx));
+      if (!puedeEntrar) estado[f.equipo] = 'Eliminado';
+    } catch (e) {
+      if (e === TIEMPO) incompleto = true; else throw e;
+    }
+  });
+  return {
+    estado,
+    metodo: incompleto ? 'exacto con el calendario (tiempo agotado en algunos equipos: ahí usa la cota simple)'
+      : 'exacto con el calendario (incluye los cruces entre rivales)'
+  };
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { parseCSV, parseEquipos, parsePartidos, construirMapa, chequearTabla, aplicarResultados, validar, estimarFuerzas,
+    simular, estadoSimple, estadoExacto, cmpTabla, normalizar, POR_COMPLETAR, completo, enteroOpt };
+}
+</script>
+<script>(function () {
+'use strict';
+/* ===== Aplicación: interfaz, estado en el navegador y llamadas al motor ===== */
+const LS_KEY = 'liga_montecarlo_v1';
+const HIST_MAX = 200;
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pct = (p, d) => (p * 100).toFixed(d === undefined ? 1 : d) + ' %';
+const MOTOR_SRC = $('motor').textContent;
+const GLUE = `
+self.onmessage=function(e){var m=e.data;try{
+ if(m.tipo==='simular'){var r=simular(m.tabla,m.partidos,m.cfg,function(h,n){self.postMessage({tipo:'progreso',h:h,n:n});});self.postMessage({tipo:'fin',res:r});}
+ else if(m.tipo==='exacto'){var r2=estadoExacto(m.tabla,m.partidos,m.topN,m.limite);self.postMessage({tipo:'exacto',id:m.id,res:r2});}
+}catch(err){self.postMessage({tipo:'error',id:m.id,msg:String((err&&err.message)||err)});}};`;
+
+const AYUDA = `QUÉ HACE
+Simula miles de veces lo que queda del campeonato y cuenta cuántas veces cada equipo termina en el top 8.
+
+CÓMO USARLO
+1. Revisa los parámetros y pulsa «Simular». Cada simulación queda en el Historial (en este navegador).
+2. Resultados: probabilidad de top 8, puntos esperados, cambio frente a la simulación anterior y estado matemático.
+3. Partidos: marca resultados nuevos para probar escenarios, o agrega partidos jugados que no estén en el calendario.
+
+PARÁMETROS
+• Semilla: con una semilla fija, los mismos datos dan siempre los mismos porcentajes. Úsala para comparar cambios sin ruido. Sin semilla, cada corrida varía un poco.
+• Ventaja local: goles extra esperados por jugar en casa (0 a 2).
+• K (encogimiento): cuánto se acerca la fuerza de cada equipo al promedio de la liga. K=8 equivale a sumar 8 partidos «promedio» a los reales. Más K = más parejo.
+• X: se muestra P(puntos finales ≥ X).
+• Completar partidos faltantes: si al calendario le faltan partidos, se simulan contra un rival promedio.
+
+MODELO
+• Goles de cada equipo ~ Poisson, con ataque y defensa estimados desde la tabla (GF/GC si están en todos los equipos; si no, DG y puntos).
+• Desempate (reglamento Dimayor): puntos, DG, GF, GF de visitante, menor GC (redundante), menor GC de visitante y sorteo. Si no hay goles de visitante en datos.js, esos criterios solo cuentan los goles simulados.
+
+COLORES Y MARCAS
+• Negrita / rojo: resultado de la SIMULACIÓN (entra en todas / en ninguna).
+• Columna «Matemático»: certeza aritmética con el calendario completo (incluye los cruces en que los rivales se quitan puntos). Con un calendario incompleto usa una cota simple. Los empates en puntos se cuentan en contra del equipo, así que una marca nunca se equivoca.
+
+DATOS
+• Los datos oficiales viven en datos.js (tabla al corte y calendario). Cada fila con jugado=1 se suma encima de la tabla del corte.
+• Lo que marcas en esta página se guarda solo en tu navegador: otras personas u otros dispositivos no lo ven. Usa «Guardar respaldo» y «Cargar respaldo» para pasarlo de un dispositivo a otro.
+• Si borras los datos del navegador, se pierden los cambios locales y el historial.`;
+
+/* ---------- estado persistente (solo en este navegador) ---------- */
+let ESTADO = estadoVacio();
+function estadoVacio() { return { version: 1, config: {}, over: { res: {}, extras: [], asign: {} }, ultima: null, historial: [] }; }
+function normalizarEstado(o) {
+  const e = estadoVacio();
+  if (!o || typeof o !== 'object') return e;
+  if (o.config && typeof o.config === 'object') e.config = o.config;
+  if (o.over && typeof o.over === 'object') {
+    if (o.over.res && typeof o.over.res === 'object') e.over.res = o.over.res;
+    if (Array.isArray(o.over.extras)) e.over.extras = o.over.extras;
+    if (o.over.asign && typeof o.over.asign === 'object') e.over.asign = o.over.asign;
+  }
+  if (o.ultima && typeof o.ultima === 'object') e.ultima = o.ultima;
+  if (Array.isArray(o.historial)) e.historial = o.historial.slice(-HIST_MAX);
+  return e;
+}
+function cargarLS() {
+  try { const t = localStorage.getItem(LS_KEY); if (t) ESTADO = normalizarEstado(JSON.parse(t)); }
+  catch (e) { ESTADO = estadoVacio(); }
+}
+let avisoLS = false;
+function guardarLS() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(ESTADO)); }
+  catch (e) { if (!avisoLS) { avisoLS = true; msg('Este navegador no permite guardar datos (modo privado o bloqueado). Lo que cargues se perderá al cerrar la página.'); } }
+}
+
+/* ---------- mensajes ---------- */
+let msgTimer = null;
+function msg(texto, tipo) {
+  const d = document.createElement('div');
+  if (tipo === 'err') d.className = 'err';
+  d.textContent = texto;
+  $('msg').innerHTML = ''; $('msg').appendChild(d);
+  clearTimeout(msgTimer);
+  if (tipo !== 'err') msgTimer = setTimeout(() => { $('msg').innerHTML = ''; }, 9000);
+}
+
+/* ---------- datos ---------- */
+let BASE = [], MAPA = {}, OFIC = [], EF = [], advDatos = [], advTabla = [];
+let TABLA = [], VAL = null, advApl = [];
+let MAT = {}, MAT_METODO = 'calculando…';
+const keyOf = p => `${p.fecha}|${p.local}|${p.visitante}`;
+const mismoPar = (p, e) => (p.local === e.local && p.visitante === e.visitante) || (p.local === e.visitante && p.visitante === e.local);
+
+function construirDatos() {
+  const adv = [];
+  const D = window.DATOS || { teamsCsv: '', fixturesCsv: '' };
+  BASE = parseEquipos(D.teamsCsv, adv);
+  MAPA = construirMapa(BASE.map(f => f.equipo));
+  OFIC = parsePartidos(D.fixturesCsv, MAPA, adv);
+  advTabla = chequearTabla(BASE);
+  EF = OFIC.map((p, i) => Object.assign({}, p, { idx: i, origen: 'oficial', rowKey: 'p' + i }));
+  EF.forEach(p => {
+    if (!completo(p)) {
+      const a = ESTADO.over.asign[p.rowKey];
+      if (a && MAPA[normalizar(a.local)] && MAPA[normalizar(a.visitante)]) {
+        p.local = a.local; p.visitante = a.visitante; if (a.fecha) p.fecha = a.fecha; p.origen = 'local';
+      }
+    }
+  });
+  EF.forEach(p => {
+    if (p.jugado || !completo(p)) return;
+    const r = ESTADO.over.res[keyOf(p)];
+    if (r && Number.isInteger(r.gl) && Number.isInteger(r.gv)) { p.jugado = true; p.gl = r.gl; p.gv = r.gv; p.origen = 'local'; }
+  });
+  ESTADO.over.extras.forEach((e, i) => {
+    if (!MAPA[normalizar(e.local)] || !MAPA[normalizar(e.visitante)]) return;
+    if (EF.some(p => p.jugado && p.origen === 'oficial' && mismoPar(p, e))) {
+      adv.push(`El partido agregado ${e.local} vs ${e.visitante} ya está en datos.js como jugado: se ignora el de este navegador`); return;
+    }
+    EF.push({ fecha: e.fecha || 'extra', local: e.local, visitante: e.visitante, jugado: true, gl: e.gl, gv: e.gv,
+      nota: 'agregado en este navegador', origen: 'extra', extraIdx: i, idx: -1, rowKey: 'x' + i });
+  });
+  advDatos = adv;
+}
+
+function recalcular() {
+  construirDatos();
+  const r = aplicarResultados(BASE, EF);
+  TABLA = r.tabla; advApl = r.adv;
+  VAL = validar(TABLA, EF);
+  MAT = estadoSimple(TABLA); MAT_METODO = 'cota simple (calculando el cálculo exacto…)';
+  renderTodo();
+  pedirExacto();
+}
+
+/* ---------- workers ---------- */
+function crearWorker() {
+  const blob = new Blob([MOTOR_SRC + '\n' + GLUE], { type: 'application/javascript' });
+  return new Worker(URL.createObjectURL(blob));
+}
+let exId = 0, exWorker = null;
+function pedirExacto() {
+  exId++; const id = exId;
+  if (exWorker) { exWorker.terminate(); exWorker = null; }
+  const fin = res => {
+    if (id !== exId) return;
+    if (res.estado) { MAT = res.estado; }
+    MAT_METODO = res.metodo;
+    renderResultados();
+  };
+  try {
+    exWorker = crearWorker();
+    exWorker.onmessage = e => { if (e.data.tipo === 'exacto') fin(e.data.res); exWorker.terminate(); exWorker = null; };
+    exWorker.onerror = () => { MAT_METODO = 'cota simple'; renderResultados(); };
+    exWorker.postMessage({ tipo: 'exacto', id, tabla: TABLA, partidos: EF, topN: TOP_N, limite: 8000 });
+  } catch (err) {
+    setTimeout(() => fin(estadoExacto(TABLA, EF, TOP_N, 3000)), 0);
+  }
+}
+
+/* ---------- parámetros ---------- */
+function leerCfg() {
+  const num = (id, nombre) => { const v = parseFloat($(id).value.replace(',', '.')); if (!isFinite(v)) throw new Error(nombre + ' debe ser un número.'); return v; };
+  const sims = Math.round(num('p-sims', 'Simulaciones'));
+  if (sims < 1000 || sims > 500000) throw new Error('Simulaciones: entre 1.000 y 500.000.');
+  const st = $('p-seed').value.trim();
+  let seed = null;
+  if (st !== '') { if (!/^-?\d+$/.test(st)) throw new Error('La semilla debe ser un entero o quedar vacía.'); seed = parseInt(st, 10); }
+  const ventaja = num('p-vent', 'Ventaja local'), k = num('p-k', 'K'), x = Math.round(num('p-x', 'Puntaje fijo X'));
+  if (k <= 0) throw new Error('K debe ser mayor que 0.');
+  if (ventaja < 0 || ventaja >= 2) throw new Error('La ventaja local debe estar entre 0 y 2 goles.');
+  return { sims, seed, ventaja, k, x, relleno: $('p-relleno').checked };
+}
+function cfgAUI(c) {
+  const d = Object.assign({ sims: 100000, seed: 7, ventaja: 0.25, k: 8, x: 29, relleno: true }, c || {});
+  $('p-sims').value = d.sims; $('p-seed').value = d.seed === null || d.seed === undefined ? '' : d.seed;
+  $('p-vent').value = d.ventaja; $('p-k').value = d.k; $('p-x').value = d.x; $('p-relleno').checked = !!d.relleno;
+}
+
+/* ---------- simulación ---------- */
+let ocupado = false, simWorker = null;
+function setOcupado(v) {
+  ocupado = v;
+  ['b-sim', 'b-imp', 'b-csv', 'b-resp', 'b-rest', 'b-reset', 'b-marcar', 'b-deshacer', 'b-extra', 'b-asig', 'b-hborrar'].forEach(i => { $(i).disabled = v; });
+}
+function ejecutarSim() {
+  if (ocupado) return;
+  let cfg;
+  try { cfg = leerCfg(); } catch (e) { msg(e.message, 'err'); return; }
+  ESTADO.config = cfg;
+  setOcupado(true); $('prog').style.width = '0'; $('estado').textContent = 'Simulando…';
+  const etiqueta = $('p-etq').value.trim();
+  const terminar = res => {
+    setOcupado(false); $('prog').style.width = '100%';
+    const prev = ESTADO.historial.length ? ESTADO.historial[ESTADO.historial.length - 1] : null;
+    const v = aVista(res, prev, etiqueta);
+    ESTADO.ultima = v;
+    ESTADO.historial.push({ timestamp: v.timestamp, nSims: v.nSims, etiqueta, pTop8: v.pTop8, ptsEsp: v.ptsEsp });
+    ESTADO.historial = ESTADO.historial.slice(-HIST_MAX);
+    guardarLS();
+    $('estado').textContent = `Listo: ${v.nSims.toLocaleString('es-CO')} simulaciones`;
+    renderTodo();
+  };
+  const fallo = m => { setOcupado(false); $('prog').style.width = '0'; $('estado').textContent = 'Error'; msg('Error en la simulación: ' + m, 'err'); };
+  try {
+    simWorker = crearWorker();
+    simWorker.onmessage = e => {
+      const m = e.data;
+      if (m.tipo === 'progreso') { $('prog').style.width = (100 * m.h / m.n) + '%'; $('estado').textContent = `Simulando… ${m.h.toLocaleString('es-CO')}/${m.n.toLocaleString('es-CO')}`; }
+      else if (m.tipo === 'fin') { simWorker.terminate(); simWorker = null; terminar(m.res); }
+      else if (m.tipo === 'error') { simWorker.terminate(); simWorker = null; fallo(m.msg); }
+    };
+    simWorker.onerror = ev => { fallo(ev.message || 'el proceso en segundo plano falló'); };
+    simWorker.postMessage({ tipo: 'simular', tabla: TABLA, partidos: EF, cfg });
+  } catch (err) {
+    setTimeout(() => { try { terminar(simular(TABLA, EF, cfg, null)); } catch (e2) { fallo(e2.message); } }, 20);
+  }
+}
+
+function aVista(r, prev, etiqueta) {
+  const d = a => { const o = {}; r.nombres.forEach((n, i) => { o[n] = a[i]; }); return o; };
+  let delta = null;
+  if (prev && prev.pTop8) {
+    delta = {};
+    r.nombres.forEach((n, i) => { const p0 = prev.pTop8[n]; delta[n] = p0 === undefined ? 0 : (r.pTop8[i] - p0) * 100; });
+  }
+  return {
+    timestamp: r.timestamp, nSims: r.nSims, etiqueta, nombres: r.nombres, pTop8: d(r.pTop8), ptsEsp: d(r.ptsEsp),
+    p10: d(r.p10), p50: d(r.p50), p90: d(r.p90), probX: d(r.probX), x: r.x, dist: r.dist, corte: r.corte,
+    relleno: r.relleno, faltan: r.faltan, seed: r.seed, k: r.k, ventaja: r.ventaja, delta,
+    siempre: r.nombres.filter((n, i) => r.siempre[i]), nunca: r.nombres.filter((n, i) => r.nunca[i]),
+    advertencias: r.advertencias
+  };
+}
+
+/* ---------- resultados ---------- */
+let orden = { col: 'tabla', desc: true };
+const COLS = [
+  ['num', '#', ''], ['equipo', 'Equipo', 'l'], ['pj', 'PJ', ''], ['pts', 'Pts', ''], ['dg', 'DG', ''],
+  ['ptsEsp', 'Pts esperados', ''], ['rango', 'P10–P90', ''], ['pTop8', 'P(top 8)', ''], ['barra', 'Barra', ''],
+  ['delta', 'Δ pp', ''], ['probX', 'P(≥X)', ''], ['mat', 'Matemático', '']
+];
+function renderResultados() {
+  const v = ESTADO.ultima || {};
+  const seguros = new Set(v.siempre || []), nunca = new Set(v.nunca || []);
+  const xTxt = v.x !== undefined ? v.x : (parseInt($('p-x').value, 10) || '');
+  $('t-res').tHead.innerHTML = '<tr>' + COLS.map(([id, t, c]) => {
+    const flecha = orden.col === id ? (orden.desc ? ' ▼' : ' ▲') : '';
+    return `<th class="${c}" data-col="${id}">${id === 'probX' ? 'P(≥' + esc(xTxt) + ')' : t}${flecha}</th>`;
+  }).join('') + '</tr>';
+  const filas = TABLA.map(f => {
+    const n = f.equipo, g = o => (v[o] || {})[n];
+    return { f, n, ptsEsp: g('ptsEsp'), p10: g('p10'), p90: g('p90'), p50: g('p50'), pTop8: g('pTop8'),
+      delta: v.delta ? v.delta[n] : undefined, probX: g('probX') };
+  });
+  const col = orden.col === 'barra' ? 'pTop8' : orden.col === 'rango' ? 'p50' : orden.col;
+  let lista;
+  if (col === 'tabla') lista = filas.slice().sort((a, b) => cmpTabla(a.f, b.f));
+  else if (col === 'equipo') lista = filas.slice().sort((a, b) => (orden.desc ? -1 : 1) * a.n.localeCompare(b.n, 'es'));
+  else {
+    const val = r => col === 'pj' || col === 'pts' || col === 'dg' ? r.f[col] : r[col];
+    const con = filas.filter(r => val(r) !== undefined && val(r) !== null);
+    const sin = filas.filter(r => val(r) === undefined || val(r) === null);
+    lista = con.sort((a, b) => (orden.desc ? val(b) - val(a) : val(a) - val(b))).concat(sin);
+  }
+  $('t-res').tBodies[0].innerHTML = lista.map((r, i) => {
+    const p = r.pTop8;
+    const cls = [p === undefined ? '' : p >= 0.8 ? 'v' : p >= 0.2 ? 'a' : 'r', seguros.has(r.n) ? 'seguro' : '', nunca.has(r.n) ? 'nunca' : ''].filter(Boolean).join(' ');
+    let dl = '—';
+    if (r.delta !== undefined && Math.abs(r.delta) >= 0.1) dl = r.delta > 0 ? `<span class="up">▲ +${r.delta.toFixed(1)}</span>` : `<span class="dn">▼ ${r.delta.toFixed(1)}</span>`;
+    const m = MAT[r.n];
+    const mat = m === 'Clasificado' ? '<span class="mat-c">Clasificado</span>' : m === 'Eliminado' ? '<span class="mat-e">Eliminado</span>' : '—';
+    return `<tr class="${cls}"><td>${i + 1}</td><td class="l">${esc(r.n)}</td><td>${r.f.pj}</td><td>${r.f.pts}</td><td>${r.f.dg}</td>` +
+      `<td>${r.ptsEsp === undefined ? '—' : r.ptsEsp.toFixed(1)}</td>` +
+      `<td>${r.p10 === undefined ? '—' : Math.round(r.p10) + '–' + Math.round(r.p90)}</td>` +
+      `<td>${p === undefined ? '—' : pct(p)}</td>` +
+      `<td>${p === undefined ? '' : `<span class="bar"><i style="width:${(p * 100).toFixed(1)}%"></i></span>`}</td>` +
+      `<td>${dl}</td><td>${r.probX === undefined ? '—' : pct(r.probX)}</td><td>${mat}</td></tr>`;
+  }).join('');
+  const faltan = VAL ? VAL.totalFaltantes : 0;
+  $('banner').textContent = faltan > 0
+    ? (($('p-relleno').checked ? '⚠ Resultados aproximados: faltan ' : '⚠ Solo partidos cargados: faltan ') + faltan + ' partidos por cargar')
+    : '';
+  const lineas = [`Columna Matemático: ${MAT_METODO}`].concat(advDatos, advTabla, advApl, VAL ? VAL.advertencias : []);
+  if (lineas.length === 1) lineas.push('Sin advertencias.');
+  $('avisos').textContent = lineas.map(x => '• ' + x).join('\n');
+  $('corte').textContent = (window.DATOS && window.DATOS.corte) ? '· ' + window.DATOS.corte : '';
+}
+$('t-res').addEventListener('click', e => {
+  const th = e.target.closest('th'); if (!th) return;
+  const id = th.dataset.col;
+  if (id === 'num') orden = { col: 'tabla', desc: true };
+  else orden = { col: id, desc: orden.col === id ? !orden.desc : id !== 'equipo' };
+  renderResultados();
+});
+
+/* ---------- gráficos ---------- */
+function renderGraficos() {
+  const v = ESTADO.ultima;
+  const vacio = '<p class="muted">Aún no hay simulación. Pulsa «Simular».</p>';
+  if (!v) { $('g-bars').innerHTML = vacio; $('g-corte').innerHTML = ''; $('g-corte-n').textContent = ''; $('g-heat').innerHTML = ''; return; }
+  const ordP = v.nombres.slice().sort((a, b) => v.pTop8[b] - v.pTop8[a]);
+  $('g-bars').innerHTML = ordP.map(n => {
+    const p = v.pTop8[n], c = p >= 0.8 ? 'v' : p >= 0.2 ? 'a' : 'r';
+    return `<div class="brow"><span>${esc(n)}</span><div class="btrack"><div class="bfill ${c}" style="width:${(p * 100).toFixed(1)}%"></div></div><span class="bv">${pct(p)}</span></div>`;
+  }).join('');
+  const corte = v.corte || [];
+  if (corte.length) {
+    const mx = Math.max(...corte.map(c => c[1])), tot = corte.reduce((s, c) => s + c[1], 0);
+    let acum = 0, med = corte[0][0];
+    for (const [val, f] of corte) { acum += f; if (acum >= tot / 2) { med = val; break; } }
+    const lo = corte[0][0], hi = corte[corte.length - 1][0], mapa = {};
+    corte.forEach(([val, f]) => { mapa[val] = f; });
+    let h = '';
+    for (let p = lo; p <= hi; p++) {
+      const f = mapa[p] || 0;
+      h += `<div class="${p === med ? 'med' : ''}" title="${p} pts: ${f.toLocaleString('es-CO')} simulaciones"><i style="height:${(f / mx * 150).toFixed(0)}px"></i><span>${p}</span></div>`;
+    }
+    $('g-corte').innerHTML = `<div class="hist">${h}</div>`;
+    $('g-corte-n').textContent = `Mediana: ${med} puntos (en rojo).`;
+  }
+  const ordE = v.nombres.slice().sort((a, b) => v.ptsEsp[b] - v.ptsEsp[a]);
+  const T = ordE.length;
+  let mx = 0; ordE.forEach(n => (v.dist[n] || []).forEach(p => { if (p > mx) mx = p; }));
+  let h = '<thead><tr><th class="l">Equipo</th>' + Array.from({ length: T }, (_, i) => `<th class="${i === 7 ? 'c8' : ''}">${i + 1}</th>`).join('') + '</tr></thead><tbody>';
+  ordE.forEach(n => {
+    h += `<tr><td class="l">${esc(n)}</td>` + (v.dist[n] || []).map((p, i) =>
+      `<td class="${i === 7 ? 'c8' : ''}" title="${esc(n)} · puesto ${i + 1}: ${pct(p)}" style="background:rgba(29,95,192,${(mx ? Math.min(1, p / mx) * 0.9 : 0).toFixed(2)});color:${p / mx > .55 ? '#fff' : 'inherit'}">${p >= 0.005 ? Math.round(p * 100) : ''}</td>`).join('') + '</tr>';
+  });
+  $('g-heat').innerHTML = h + '</tbody>';
+}
+
+/* ---------- partidos ---------- */
+let sel = -1;
+function renderPartidos() {
+  $('t-par').tBodies[0].innerHTML = EF.map((p, i) => {
+    let est, cls = '';
+    if (p.jugado) { est = p.origen === 'oficial' ? 'Jugado' : 'Jugado (local)'; cls = 'muted'; }
+    else if (completo(p)) est = 'Pendiente';
+    else { est = 'Sin equipos'; cls = 'a'; }
+    const goles = p.jugado && p.gl !== null ? `${p.gl}-${p.gv}` : '';
+    return `<tr data-i="${i}" class="${cls} ${i === sel ? 'sel' : ''}" style="cursor:pointer"><td>${i + 1}</td><td>${esc(p.fecha)}</td><td class="l">${esc(p.local)}</td><td class="l">${esc(p.visitante)}</td><td>${est}</td><td>${goles}</td><td class="l">${esc(p.nota)}</td></tr>`;
+  }).join('');
+  const opts = '<option value="">—</option>' + BASE.map(f => f.equipo).sort((a, b) => a.localeCompare(b, 'es')).map(n => `<option>${esc(n)}</option>`).join('');
+  [['a-loc'], ['a-vis'], ['x-loc'], ['x-vis']].forEach(([id]) => { const cur = $(id).value; $(id).innerHTML = opts; $(id).value = cur; });
+}
+$('t-par').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-i]'); if (!tr) return;
+  sel = parseInt(tr.dataset.i, 10);
+  const p = EF[sel];
+  $('sel-txt').textContent = `#${sel + 1}: ${p.local} vs ${p.visitante} (${p.fecha})` + (p.jugado ? (p.origen === 'oficial' ? ' · resultado oficial (datos.js)' : ' · resultado de este navegador') : '');
+  $('e-gl').value = p.gl === null || p.gl === undefined ? '' : p.gl;
+  $('e-gv').value = p.gv === null || p.gv === undefined ? '' : p.gv;
+  $('asig').hidden = completo(p);
+  $('a-loc').value = ''; $('a-vis').value = ''; $('a-fec').value = p.fecha;
+  renderPartidos();
+});
+function enteroNoNeg(id) { const t = $(id).value.trim(); if (!/^\d+$/.test(t)) return null; return parseInt(t, 10); }
+function cambioLocal(texto) { guardarLS(); recalcular(); msg(texto + ' (se guarda solo en este navegador; vuelve a simular para actualizar las probabilidades).'); }
+$('b-marcar').addEventListener('click', () => {
+  if (sel < 0) return msg('Selecciona primero un partido.', 'err');
+  const p = EF[sel];
+  if (!completo(p)) return msg('Primero asigna los equipos de esa fila.', 'err');
+  const gl = enteroNoNeg('e-gl'), gv = enteroNoNeg('e-gv');
+  if (gl === null || gv === null) return msg('Escribe enteros ≥ 0 en ambos campos de goles.', 'err');
+  if (p.origen === 'oficial' && p.jugado) return msg('Ese resultado viene de datos.js (oficial). Para cambiarlo, edita ese archivo en GitHub.', 'err');
+  if (p.origen === 'extra') ESTADO.over.extras[p.extraIdx] = Object.assign({}, ESTADO.over.extras[p.extraIdx], { gl, gv });
+  else ESTADO.over.res[keyOf(p)] = { gl, gv };
+  cambioLocal('Resultado guardado');
+});
+$('b-deshacer').addEventListener('click', () => {
+  if (sel < 0) return msg('Selecciona primero un partido.', 'err');
+  const p = EF[sel];
+  if (p.origen === 'oficial' && p.jugado) return msg('Ese resultado viene de datos.js (oficial); no se puede deshacer desde aquí.', 'err');
+  if (p.origen === 'extra') { ESTADO.over.extras.splice(p.extraIdx, 1); sel = -1; }
+  else delete ESTADO.over.res[keyOf(p)];
+  cambioLocal('Resultado deshecho');
+});
+$('b-asig').addEventListener('click', () => {
+  if (sel < 0) return;
+  const p = EF[sel];
+  if (completo(p)) return msg('Esa fila ya tiene equipos.', 'err');
+  const loc = $('a-loc').value, vis = $('a-vis').value;
+  if (!loc || !vis || loc === vis) return msg('Elige dos equipos distintos.', 'err');
+  ESTADO.over.asign[p.rowKey] = { local: loc, visitante: vis, fecha: $('a-fec').value.trim() || p.fecha };
+  cambioLocal('Equipos asignados');
+});
+$('b-extra').addEventListener('click', () => {
+  const loc = $('x-loc').value, vis = $('x-vis').value, gl = enteroNoNeg('x-gl'), gv = enteroNoNeg('x-gv');
+  if (!loc || !vis || loc === vis) return msg('Elige dos equipos distintos.', 'err');
+  if (gl === null || gv === null) return msg('Escribe enteros ≥ 0 en ambos campos de goles.', 'err');
+  const par = { local: loc, visitante: vis };
+  const pendiente = EF.findIndex(p => !p.jugado && completo(p) && mismoPar(p, par));
+  if (pendiente >= 0) { sel = pendiente; renderPartidos(); return msg('Ese partido ya está en el calendario: selecciónalo en la lista (resaltado) y márcalo como jugado.', 'err'); }
+  if (EF.some(p => p.jugado && mismoPar(p, par))) return msg('Ese partido ya figura como jugado.', 'err');
+  ESTADO.over.extras.push({ fecha: 'extra', local: loc, visitante: vis, gl, gv });
+  cambioLocal('Partido agregado');
+});
+
+/* ---------- historial ---------- */
+let histSel = null;
+function renderHistorial() {
+  const hist = ESTADO.historial, v = ESTADO.ultima || {};
+  const top = BASE.map(f => f.equipo).sort((a, b) => ((v.pTop8 || {})[b] || 0) - ((v.pTop8 || {})[a] || 0));
+  if (!histSel) histSel = new Set(top.slice(0, 8));
+  $('h-checks').innerHTML = top.map(n => `<label><input type="checkbox" data-n="${esc(n)}" ${histSel.has(n) ? 'checked' : ''}>${esc(n)}</label>`).join('');
+  if (!hist.length) { $('h-chart').innerHTML = '<p class="muted">Todavía no hay simulaciones guardadas.</p>'; return; }
+  const W = 900, H = 330, mL = 40, mR = 12, mT = 10, mB = 80;
+  const xs = i => mL + (hist.length === 1 ? (W - mL - mR) / 2 : i * (W - mL - mR) / (hist.length - 1));
+  const ys = p => mT + (1 - p) * (H - mT - mB);
+  const colores = ['#1d5fc0', '#e8710a', '#17894f', '#c62828', '#7b3fa0', '#0d8a8a', '#a67c00', '#d6336c', '#5c6bc0', '#6d4c41', '#2e7d32', '#455a64'];
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolución de P(top 8)">`;
+  [0, 0.25, 0.5, 0.75, 1].forEach(g => { svg += `<line x1="${mL}" x2="${W - mR}" y1="${ys(g)}" y2="${ys(g)}" stroke="var(--bd)"/><text x="${mL - 6}" y="${ys(g) + 4}" text-anchor="end">${g * 100}%</text>`; });
+  const paso = Math.max(1, Math.ceil(hist.length / 12));
+  hist.forEach((h, i) => {
+    if (i % paso && i !== hist.length - 1) return;
+    const et = (h.etiqueta ? h.etiqueta + ' · ' : '') + String(h.timestamp || '').slice(5, 16).replace('T', ' ');
+    svg += `<text transform="translate(${xs(i)},${H - mB + 12}) rotate(-40)" text-anchor="end">${esc(et)}</text>`;
+  });
+  let k = 0; const leyenda = [];
+  top.forEach(n => {
+    if (!histSel.has(n)) return;
+    const c = colores[k++ % colores.length];
+    const pts = hist.map((h, i) => { const p = (h.pTop8 || {})[n]; return p === undefined ? null : [xs(i), ys(p)]; }).filter(Boolean);
+    if (!pts.length) return;
+    svg += `<polyline fill="none" stroke="${c}" stroke-width="2" points="${pts.map(q => q.join(',')).join(' ')}"/>` + pts.map(q => `<circle cx="${q[0]}" cy="${q[1]}" r="3" fill="${c}"/>`).join('');
+    leyenda.push(`<span style="color:${c}">● ${esc(n)}</span>`);
+  });
+  $('h-chart').innerHTML = svg + '</svg><div class="checks" style="margin-top:6px">' + leyenda.join(' ') + '</div>';
+}
+$('h-checks').addEventListener('change', e => {
+  const n = e.target.dataset.n; if (!n) return;
+  if (e.target.checked) histSel.add(n); else histSel.delete(n);
+  renderHistorial();
+});
+$('b-hborrar').addEventListener('click', () => {
+  if (!confirm('¿Borrar todo el historial de simulaciones de este navegador?')) return;
+  ESTADO.historial = []; guardarLS(); renderHistorial(); msg('Historial borrado.');
+});
+
+/* ---------- exportar / importar ---------- */
+function descargar(nombre, texto, tipo) {
+  const b = new Blob([texto], { type: tipo }), a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = nombre; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+$('b-csv').addEventListener('click', () => {
+  const v = ESTADO.ultima;
+  if (!v) return msg('Primero ejecuta una simulación.', 'err');
+  const filas = [['equipo', 'pj', 'pts', 'dg', 'pts_esp', 'p10', 'p50', 'p90', 'p_top8', 'p_puntos_>=' + v.x, 'delta_pp', 'marca_simulacion', 'matematico', 'etiqueta', 'timestamp']];
+  v.nombres.slice().sort((a, b) => v.pTop8[b] - v.pTop8[a]).forEach(n => {
+    const f = TABLA.find(t => t.equipo === n) || {};
+    filas.push([n, f.pj, f.pts, f.dg, v.ptsEsp[n], v.p10[n], v.p50[n], v.p90[n], v.pTop8[n], v.probX[n], v.delta ? v.delta[n] : '',
+      v.siempre.includes(n) ? 'siempre top 8' : v.nunca.includes(n) ? 'nunca top 8' : '', MAT[n] || '', v.etiqueta || '', v.timestamp]);
+  });
+  const csv = filas.map(r => r.map(c => { const s = c === undefined || c === null ? '' : String(c); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\r\n');
+  descargar('resultados_liga.csv', '﻿' + csv, 'text/csv;charset=utf-8');
+});
+$('b-imp').addEventListener('click', () => $('f-imp').click());
+$('f-imp').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => importarFilas(parseCSV(String(rd.result)));
+  rd.onerror = () => msg('No pude leer el archivo.', 'err');
+  rd.readAsText(f, 'utf-8');
+});
+function importarFilas(filas) {
+  let aplicados = 0, agregados = 0, yaEstaban = 0;
+  const invertidos = [], invalidos = [];
+  filas.forEach((r, i) => {
+    if ((r.jugado || '').trim() !== '1') return;
+    const loc = MAPA[normalizar(r.local || '')], vis = MAPA[normalizar(r.visitante || '')];
+    let gl = null, gv = null;
+    try { gl = enteroOpt(r.goles_local); gv = enteroOpt(r.goles_visitante); } catch (e) { gl = gv = null; }
+    if (!loc || !vis || loc === vis || gl === null || gv === null || gl < 0 || gv < 0) { invalidos.push(`fila ${i + 2}: ${r.local} vs ${r.visitante}`); return; }
+    let p = EF.find(q => !q.jugado && completo(q) && q.local === loc && q.visitante === vis), inv = false;
+    if (!p) { p = EF.find(q => !q.jugado && completo(q) && q.local === vis && q.visitante === loc); inv = !!p; }
+    if (p) {
+      ESTADO.over.res[keyOf(p)] = inv ? { gl: gv, gv: gl } : { gl, gv };
+      aplicados++; if (inv) invertidos.push(`${p.local} ${gv}-${gl} ${p.visitante} (fila ${i + 2})`);
+    } else if (EF.some(q => q.jugado && mismoPar(q, { local: loc, visitante: vis }))) yaEstaban++;
+    else { ESTADO.over.extras.push({ fecha: 'extra', local: loc, visitante: vis, gl, gv }); agregados++; }
+  });
+  guardarLS(); recalcular();
+  const t = [`Aplicados: ${aplicados}`, `Agregados (no estaban en el calendario): ${agregados}`];
+  if (yaEstaban) t.push(`Ya estaban cargados: ${yaEstaban}`);
+  if (invertidos.length) t.push('Local/visitante invertidos (revisa):\n  ' + invertidos.join('\n  '));
+  if (invalidos.length) t.push('Inválidos:\n  ' + invalidos.join('\n  '));
+  msg(t.join('\n'), invalidos.length ? 'err' : undefined);
+}
+$('b-resp').addEventListener('click', () => {
+  descargar('respaldo_liga.json', JSON.stringify(ESTADO, null, 1), 'application/json');
+});
+$('b-rest').addEventListener('click', () => $('f-rest').click());
+$('f-rest').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const o = JSON.parse(String(rd.result));
+      if (!o || typeof o !== 'object' || !o.over) throw new Error('no parece un respaldo de este simulador');
+      ESTADO = normalizarEstado(o); guardarLS(); cfgAUI(ESTADO.config); histSel = null; sel = -1; recalcular();
+      msg('Respaldo cargado.');
+    } catch (err) { msg('No pude cargar el respaldo: ' + err.message, 'err'); }
+  };
+  rd.readAsText(f, 'utf-8');
+});
+$('b-reset').addEventListener('click', () => {
+  if (!confirm('¿Borrar los resultados cargados en este navegador y volver a los datos oficiales? (El historial se conserva.)')) return;
+  ESTADO.over = { res: {}, extras: [], asign: {} }; sel = -1; guardarLS(); recalcular(); msg('Listo: se usan solo los datos oficiales de datos.js.');
+});
+
+/* ---------- navegación y arranque ---------- */
+function renderTodo() { renderResultados(); renderPartidos(); renderGraficos(); renderHistorial(); }
+document.querySelector('.tabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tab]'); if (!b) return;
+  document.querySelectorAll('.tabs button').forEach(x => x.setAttribute('aria-selected', x === b ? 'true' : 'false'));
+  document.querySelectorAll('section.tab').forEach(s => s.classList.toggle('on', s.id === 'tab-' + b.dataset.tab));
+});
+$('b-sim').addEventListener('click', ejecutarSim);
+$('ayuda').textContent = AYUDA;
+
+(function inicio() {
+  const s = document.createElement('script');
+  s.textContent = MOTOR_SRC; document.head.appendChild(s); // define el motor también en la página
+})();
+if (window.innerWidth < 640) $('opciones').open = false;
+cargarLS();
+cfgAUI(ESTADO.config);
+$('p-etq').value = '';
+recalcular();
+})();
+</script>
+</body>
+</html>
