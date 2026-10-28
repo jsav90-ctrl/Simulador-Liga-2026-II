@@ -37,8 +37,8 @@ Jaguares de Córdoba,14,10,-12,16,28
 `,
   fixturesCsv: `fecha,local,visitante,jugado,goles_local,goles_visitante,nota
 5,Internacional de Bogotá,Independiente Medellín,0,,,
-5,Cúcuta Deportivo,Águilas Doradas,0,,,
-5,Boyacá Chicó,Junior,0,,,
+5,Cúcuta Deportivo,Águilas Doradas,1,0,2,
+5,Boyacá Chicó,Junior,1,1,1,
 5,Once Caldas,Alianza Valledupar,0,,,
 5,Atlético Bucaramanga,Deportivo Pasto,0,,,
 5,América de Cali,Fortaleza CEIF,0,,,
