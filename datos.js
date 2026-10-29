@@ -36,10 +36,10 @@ Deportivo Pasto,15,12,-12,10,22
 Jaguares de Córdoba,14,10,-12,16,28
 `,
   fixturesCsv: `fecha,local,visitante,jugado,goles_local,goles_visitante,nota
-5,Internacional de Bogotá,Independiente Medellín,0,,,
+5,Internacional de Bogotá,Independiente Medellín,1,3,1,
 5,Cúcuta Deportivo,Águilas Doradas,1,0,2,
 5,Boyacá Chicó,Junior,1,1,1,
-5,Once Caldas,Alianza Valledupar,0,,,
+5,Once Caldas,Alianza Valledupar,1,1,0,
 5,Atlético Bucaramanga,Deportivo Pasto,0,,,
 5,América de Cali,Fortaleza CEIF,0,,,
 5,Atlético Nacional,Independiente Santa Fe,0,,,
