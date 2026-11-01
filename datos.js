@@ -54,7 +54,7 @@ Jaguares de Córdoba,14,10,-12,16,28
 17,Deportivo Pereira,Deportes Tolima,0,,,
 17,Millonarios,América de Cali,0,,,
 17,Deportivo Pasto,Jaguares de Córdoba,0,,,
-17,Llaneros FC,Junior,0,,,
+17,Llaneros FC,Junior,1,3,2,
 18,Fortaleza CEIF,Independiente Medellín,0,,,
 18,Once Caldas,Águilas Doradas,0,,,
 18,Deportes Tolima,Millonarios,0,,,
