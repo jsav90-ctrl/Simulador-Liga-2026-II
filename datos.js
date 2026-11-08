@@ -59,7 +59,7 @@ Jaguares de Córdoba,14,10,-12,16,28
 18,Once Caldas,Águilas Doradas,1,1,0,
 18,Deportes Tolima,Millonarios,0,,,
 18,Atlético Nacional,Deportivo Pereira,1,4,3,
-18,América de Cali,Deportivo Cali,0,,,
+18,América de Cali,Deportivo Cali,1,0,0,
 18,Boyacá Chicó,Internacional de Bogotá,1,2,1,
 18,Jaguares de Córdoba,Atlético Bucaramanga,0,,,
 18,Junior,Cúcuta Deportivo,0,,,
