@@ -62,7 +62,7 @@ Jaguares de Córdoba,14,10,-12,16,28
 18,América de Cali,Deportivo Cali,1,0,0,
 18,Boyacá Chicó,Internacional de Bogotá,1,2,1,
 18,Jaguares de Córdoba,Atlético Bucaramanga,1,0,4,
-18,Junior,Cúcuta Deportivo,0,,,
+18,Junior,Cúcuta Deportivo,1,2,0,
 18,Alianza Valledupar,Llaneros FC,1,1,2,
 18,Independiente Santa Fe,Deportivo Pasto,1,5,0,
 19,Atlético Nacional,Once Caldas,0,,,
