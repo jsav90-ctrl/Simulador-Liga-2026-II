@@ -69,10 +69,10 @@ Jaguares de Córdoba,14,10,-12,16,28
 19,Águilas Doradas,Independiente Medellín,0,,,
 19,Cúcuta Deportivo,Jaguares de Córdoba,0,,,
 19,Atlético Bucaramanga,Fortaleza CEIF,0,,,
-19,Deportivo Pasto,Junior,0,,,
-19,Internacional de Bogotá,Independiente Santa Fe,0,,,
+19,Deportivo Pasto,Junior,1,0,1,
+19,Internacional de Bogotá,Independiente Santa Fe,1,0,2,
 19,Millonarios,Alianza Valledupar,0,,,
-19,Llaneros FC,Boyacá Chicó,0,,,
+19,Llaneros FC,Boyacá Chicó,1,0,0,
 19,Deportivo Cali,Deportes Tolima,0,,,
 19,Deportivo Pereira,América de Cali,0,,,
 `
